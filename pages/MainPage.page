@@ -1,0 +1,200 @@
+<apex:page controller="MainPageController" showHeader="false" standardStylesheets="false" docType="HTML-5.0">
+	<apex:stylesheet value="{!URLFOR($Resource.styles)}"/>
+	<apex:stylesheet value="{!URLFOR($Resource.Bootstrap)}"/>
+
+	<apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+	<apex:includeScript value="{!URLFOR($Resource.JavaScript)}"/>
+
+	<div id="sessionId" class="hidden">{!$Api.Session_Id}</div>
+	<div id="permission" class="hidden">{!$Permission.Manage_AddDelete}</div>
+<!-- 	<apex:stylesheet value="{!URLFOR($Resource.InternshipResource, 'css/bootstrap.css')}"/>
+	<apex:stylesheet value="{!URLFOR($Resource.InternshipResource, 'css/styles.css')}"/>
+
+	<apex:includescript value="{!URLFOR($Resource.InternshipResource, 'js/jQuery.js')}"/>
+	<apex:includescript value="{!URLFOR($Resource.InternshipResource, 'js/script.js')}"/> -->
+
+	<div class="container-fluid">
+	  	<div class="row">
+
+	  		<div id="header" class="contentBlock col-xs-12 col-md-12">
+                <div id="softhemeLogo">
+                    <img src="http://softheme.ua/wp-content/themes/softheme/images/logo.png"/>
+                </div>
+
+                <div id="headText">
+                    Softheme Internship 2016
+                </div>
+
+                <div id="sfLogo">
+                    <img  src="https://login.salesforce.com/img/logo198.png"/>
+                </div>
+	  		</div>
+
+  			<div id="navbar" class="col-xs-2 col-md-2">
+		  		<button type="button" id="MainButton" class="btn btn-success col-md-12 btn-lg">Main</button>
+		  		<button type="button" id="ScheduleButton" class="btn btn-success col-md-12 btn-lg">Schedule</button>
+		  		<button type="button" id="MaterialsButton" class="btn btn-success col-md-12 btn-lg">Materials</button>		
+	  		</div>
+
+	  		<div id="content" class="col-xs-8 col-md-8">
+	  			<apex:outputPanel id="mainPage">
+					<apex:form>	  				
+		  				MAIN PAGE
+		  				<h2>Schedule for today!</h2>
+		  				<div class="scheduleImg">
+                        	<apex:image url="/servlet/servlet.FileDownload?file={!scheduleImg.Id}" rendered="{!showScheduleFlag}"/>
+                        </div>
+	  				</apex:form>
+	  			</apex:outputPanel>
+
+	  			<apex:outputPanel id="schedulePage">
+					<apex:form>
+		  				SCHEDULE PAGE
+		  				<div>
+		  					<apex:pageMessages ></apex:pageMessages>
+                        	<apex:actionRegion>
+			  					<apex:outputLabel value="Schedule Date "  for="scheduleDateShowOnPage"/>
+	                            <apex:input type="date" value="{!scheduleDate}" required="true" id="scheduleDate"/>
+                            	<apex:commandButton value="Show Schedule" action="{!showSchedule}" reRender="schedulePage" status="initScheduleBlock"/>
+                        	</apex:actionRegion>
+                        </div>
+
+                        <input type="button" class="btn btn-primary checkPermission" value="Add Schedule" id="addScheduleButton"/>
+                        <div id="addScheduleBlock">
+	                        <apex:actionRegion>
+	                        	<apex:actionFunction name="callSaveSchedule" action="{!saveSchedule}" status="initScheduleBlock"/>
+	                        	<apex:outputLabel value="Date"  for="sheduledate"/>
+		                        <apex:input type="date" value="{!scheduleDateForSave}" required="true" id="sheduledate"/>
+		                        <input type="button" value="Save" disabled="true" id="saveScheduleButton" />
+	                        </apex:actionRegion>
+	                        <apex:inputFile value="{!attachedFile.body}" filename="{!attachedFile.Name}" id="sheduleImg" accept="image/*"/>
+                        </div>
+
+                        <div class="scheduleImg">
+                        	<apex:image url="/servlet/servlet.FileDownload?file={!scheduleImg.Id}" rendered="{!showScheduleFlag}"/>
+                        </div>
+						<apex:actionStatus id="initScheduleBlock" onstop="schedulePageHandler();checkPermission();"/>
+	  				</apex:form>
+	  			</apex:outputPanel>
+
+	  			<apex:outputPanel id="materialsPage">
+					<apex:form>
+		  				MATERIALS PAGE
+		  				<div>
+	                        <apex:selectList multiselect="false" size="1" value="{!selectedTheme}" id="selectMaterials">
+	                            <apex:actionSupport event="onchange" action="{!showMaterials}" reRender="materialsPage" status="initMaterialBlock"/>
+	                            <apex:selectOptions value="{!statusOptionsTheme}"/>
+	                        </apex:selectList>
+	                    </div>
+
+	                    <div id="materialsTable">
+	                        <table class="table outerTable">
+	                            <tr id="firstRow">
+	                                <th>Material</th>
+	                                <th>Resource</th>
+	                                <th class="checkPermission">Delete Resource</th>
+	                            </tr>
+	                            <apex:repeat value="{!materials}" var="material">
+	                                <tr>
+	                                    <td>
+	                                        <apex:outputText value="{!material.Name}" id="materialsRepeat"/>
+	                                    </td>
+	                                    <td>
+	                                    	<table class="table table-hover innerTable">
+	                                    		<tr>
+	                                        		<th>Name</th>
+	                                        		<th>Download</th>
+	                                        		<th class="checkPermission">Delete</th>
+	                                    		</tr>
+
+	                                    		<apex:repeat value="{!materialsWithAttachment[material.Id]}" var="attachment">
+	                                        		<tr>
+	                                        			<td><apex:outputText value="{!attachment.Name}"/></td>
+	                                        			<td>
+	                                        				<apex:outputLink value="{!URLFOR($Action.Attachment.Download, attachment.Id)}" target="_blank">
+	                                            				Download
+	                                        				</apex:outputLink>
+	                                        			</td>
+	                                        			<td class="checkPermission">
+	                                        				<apex:commandButton value="Delete" action="{!removeAttachment}" status="initMaterialBlock" reRender="materialsPage">
+	                                    						<apex:param value="{!attachment.Id}" name="removeAttachmentId"/>
+	                                        				</apex:commandButton>
+	                                        			</td>
+	                                        		</tr>
+	                                    		</apex:repeat>
+	                                    	</table>
+	                                    </td>
+	                                    <td class="checkPermission">
+	                                    	<apex:commandButton value="Delete material" action="{!removeMaterial}" status="initMaterialBlock" reRender="materialsPage">
+	                    						<apex:param value="{!material.Id}" name="removeMaterialId"/>
+	                        				</apex:commandButton>
+	                                    </td>
+	                                </tr>
+	                            </apex:repeat>
+	                        </table>
+	                    </div> 
+
+	                    <button type="button" class="btn btn-primary checkPermission" id="AddMaterialButton">ADD MATERIAL</button>
+
+	                    <div id="addMaterialBlock">
+	                    	<table class="table table-condensed borderless">
+	                    		<tr>
+	                    			<td><apex:outputLabel value="Material Theme" for="materialTheme"/></td>                  			
+	                    			<td><apex:outputLabel value="Material Name" for="materialName"/></td>
+	                    		</tr>
+	                    		<tr>
+	                    			<td>
+	                    				<apex:selectList id="materialTheme" multiselect="false" size="1" >
+	                    					<apex:selectOptions value="{!statusOptionsTheme}"/>
+	                    				</apex:selectList>
+	                    			</td>
+	                    			<td><input type="text" id="materialName"/></td>
+	                    		</tr>
+	                    	</table>
+	                    	<input type="file" id="inpFile" value="Choose file" multiple="true"/>
+			  				<div id="dragandrophandler">
+						        <div class="stubText">or drop file(s) here to attach them to the object<br/></div>			     
+						        <div class="stubText small"> <br/></div>
+
+						        <apex:param name="parentId"  assignTo="{!objectIdString}" value=""/>
+						        <apex:param name="IsDocument"  assignTo="{!isDoc}" value="true"/> 
+						    </div>
+	                    </div>
+	                    <apex:actionStatus id="initMaterialBlock" onstop="materialPageHandler();checkIfExistMaterials();checkPermission();"/>
+	  				</apex:form>
+	  			</apex:outputPanel>
+	  		</div>
+
+	  		<div id="notation" class="col-xs-2 col-md-2">
+	  			<apex:outputPanel id="notationPanel">
+		  			<h2>Notations</h2>
+					<apex:form>
+			  			<apex:inputTextarea value="{!inputNotation}" html-placeholder="What do you want to share with others?"/>
+			  			<apex:commandButton value="Save Notation" action="{!saveNotations}" reRender="notationPanel" id="saveNotationButton"/>
+			  			
+			  			<apex:repeat value="{!notations}" var="notation" id="repeat">
+				  			<div class="panel panel-default">
+							    <div class="panel-heading">
+							    	<h3 class="panel-title">
+							    		<apex:outputField value="{!notation.NoteTime__c}"/>
+							    		<apex:commandButton action="{!removeNotation}" id="notateionDelete" reRender="notationPanel">
+							    			<apex:param value="{!notation.Id}" name="removeNotationId"/>
+							    		</apex:commandButton>
+							    	</h3>
+							    </div>
+							    <div class="panel-body">
+							    	<apex:outputText value="{!notation.Note__c}"/>
+							    </div>
+							</div>
+			  			</apex:repeat>
+  					</apex:form>
+	  			</apex:outputPanel>
+	  		</div>
+
+	  	</div>
+	</div>	
+
+	<footer>
+		© Dmitry Marchenkov, dmitry.marchenkov92@gmail.com
+	</footer>	  	
+</apex:page>
