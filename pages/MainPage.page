@@ -55,16 +55,19 @@
                             	<apex:commandButton value="Show Schedule" action="{!showSchedule}" reRender="schedulePage" status="initScheduleBlock"/>
                         	</apex:actionRegion>
                         </div>
+                    	<apex:actionFunction name="rerenderSchedule" action="{!showSchedule}" reRender="schedulePage" status="initScheduleBlock"/>
 
                         <input type="button" class="btn btn-primary checkPermission" value="Add Schedule" id="addScheduleButton"/>
+                        <input type="button" class="btn btn-info checkPermission hidden" value="Save" id="saveScheduleButton"/>
                         <div id="addScheduleBlock">
-	                        <apex:actionRegion renderRegionOnly="false">
-	                        	<apex:actionFunction name="callSaveSchedule" action="{!saveSchedule}" status="initScheduleBlock"/>
-	                        	<apex:outputLabel value="Date"  for="sheduledate"/>
-		                        <apex:input type="date" value="{!scheduleDateForSave}" required="true" id="sheduledate"/>
-		                        <input type="button" value="Save" disabled="true" id="saveScheduleButton"/>
-	                        </apex:actionRegion>
-	                        <apex:inputFile value="{!attachedFile.body}" filename="{!attachedFile.Name}" id="sheduleImg" accept="image/*"/>
+                        	<apex:outputLabel value="Date" for="sheduleDate"/>	
+							<input type="date" id="sheduleDate"/>
+
+	                        <input type="file" id="inpFileSchedule"/>
+			  				<div id="dragandrophandlerSchedule">
+						        <div class="stubText">or drop file(s) here to attach them to the object<br/></div>			     
+						        <div class="stubText small"> <br/></div>
+						    </div>
                         </div>
 
                         <div class="scheduleImg">
@@ -83,6 +86,7 @@
 	                            <apex:selectOptions value="{!statusOptionsTheme}"/>
 	                        </apex:selectList>
 	                    </div>
+                        <apex:actionFunction name="rerenderMaterials" action="{!showMaterials}" reRender="materialsPage" status="initMaterialBlock"/>
 
 	                    <div id="materialsTable">
 	                        <table class="table outerTable">

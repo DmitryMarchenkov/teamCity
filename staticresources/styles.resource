@@ -189,12 +189,18 @@ footer {
     color:#92AAB0;
 
 }
+
+#dragandrophandlerSchedule {
+    border:2px dotted #0B85A1;
+    width:250px;
+    color:#92AAB0;
+
+}
 .stubText {
     text-align:center;
     vertical-align:middle;
-    margin-left: 85px;
-    width: 50%;
-    font-size:200%; 
+    margin: auto 10px;
+    font-size:150%; 
 }
 .progressBar {
     width: 80%;

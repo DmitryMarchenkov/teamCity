@@ -1,4 +1,4 @@
-@RestResource(urlMapping='/DragAndDrop/v1/*')
+@RestResource(urlMapping='/DragAndDrop/materials/*')
 global with sharing class DragAndDropFileUploadService
 {
     @HttpPost
@@ -15,11 +15,6 @@ global with sharing class DragAndDropFileUploadService
         String materialTheme = req.params.get('MaterialTheme');
 
         Blob postContent = req.requestBody; 
-
-
-
-        String strt = EncodingUtil.base64Encode(postContent);
-        System.debug(loggingLevel.Error, '*** strt: ' + strt);
 
 		List<Material__c> materials = [SELECT Id, Name, Theme__c FROM Material__c WHERE Name = :materialName AND Theme__c = :materialTheme];
 		Id parentId;

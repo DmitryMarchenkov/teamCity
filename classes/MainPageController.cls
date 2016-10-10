@@ -7,26 +7,15 @@ global with sharing class MainPageController {
     public List<Notation__c> notations { get;set; }
     public Map<Id, List<Attachment>> materialsWithAttachment {get;set;}
     public Date scheduleDate {get; set;}
-    public Date scheduleDateForSave {get; set;}
     public Attachment scheduleImg {get; set;}
     public Boolean showScheduleFlag {get; set;}
-    public Schedule__c schedule {get; set;}
     public String mainPageTitle {get; set;}
-    public Attachment attachedFile {
-        get {
-            if (attachedFile == null)
-            	attachedFile = new Attachment();
-            return attachedFile;
-        }
-        set;
-    }
+    
 	public MainPageController() {
 		getPicklistValuesTheme();
 		showMaterials();
 		showNotations();
 		scheduleDate = Date.today();
-		scheduleDateForSave = Date.today();
-		schedule = new Schedule__c();
 		showSchedule();
 	}
 
@@ -120,18 +109,6 @@ global with sharing class MainPageController {
     		insert notation;
     		showNotations();
     	}
-    	return null;
-    }
-
-    public PageReference saveSchedule() {
-		List<Schedule__c> scheduleToDelete = [SELECT Id FROM Schedule__c WHERE ScheduleDate__c =: scheduleDateForSave];
-		delete scheduleToDelete;
-		schedule.ScheduleDate__c = scheduleDateForSave;
-		insert schedule;
-		attachedFile.ParentId = schedule.Id;
-        insert attachedFile;  
-        schedule = new Schedule__c();
-        attachedFile = New Attachment();
     	return null;
     }
 

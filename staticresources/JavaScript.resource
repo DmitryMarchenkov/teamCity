@@ -7,24 +7,24 @@ jQuery(document).ready(function() {
   $(".outerTable").css("display", "none");
   $("[id$='schedulePage']").css("display","none");
   $("[id$='materialsPage']").css("display","none");
-
 });
 
-function sendFileToServer(formData,status, filename, fileres){
+function sendFileToServer(objType, formData,status, filename, fileres){
   var sfdcHostName = window.location.host.split('.')[1];
-  var materialName = $("#materialName").val();
-  var materialTheme = $("[id$='materialTheme'] option:selected").text();
 
   $("#AddMaterialButton").on('click', function() {
     jqXHR.abort();
-    $( ".filename" ).remove();
-    $( ".filesize" ).remove();
-    $( ".progressBar" ).remove();
-    $( ".completed" ).remove();
-    $(".stubText").removeClass("hidden");
+    clearDragAndDrop();
   });
 
-  var uploadURL = 'https://' + sfdcHostName + '.salesforce.com/services/apexrest/DragAndDrop/v1?FileName=' + filename + '&FileResolution=' + fileres + '&MaterialName=' + materialName + '&MaterialTheme=' + materialTheme;
+  if (objType == 'material') {
+    var materialName = encodeURI($("#materialName").val());
+    var materialTheme = $("[id$='materialTheme'] option:selected").text();
+    var uploadURL = 'https://' + sfdcHostName + '.salesforce.com/services/apexrest/DragAndDrop/materials?FileName=' + filename + '&FileResolution=' + fileres + '&MaterialName=' + materialName + '&MaterialTheme=' + materialTheme;
+  } else {
+    var scheduleDate = encodeURI($("#sheduleDate").val());
+    var uploadURL = 'https://' + sfdcHostName + '.salesforce.com/services/apexrest/DragAndDrop/schedule?FileName=' + filename + '&FileResolution=' + fileres + '&ScheduleDate=' + scheduleDate;
+  }
   var jqXHR=$.ajax({
     xhr: function() {
       var xhrobj = $.ajaxSettings.xhr();
@@ -57,18 +57,28 @@ function sendFileToServer(formData,status, filename, fileres){
     cache: false,
     data: formData,
     success: function(data, textStatus){
-      status.setProgress(100);     
+      status.setProgress(100);  
+      if (objType != 'material') {
+        rerenderSchedule();
+      }
     },       
   }); 
 }
 
-function createStatusbar(obj)  {
-   this.filename = $("<div class='filename'></div>").appendTo($('#dragandrophandler'));
-   this.size = $("<div class='filesize'></div>").appendTo($('#dragandrophandler'));
-   this.progressBar = $("<div class='progressBar'><div></div></div>").appendTo($('#dragandrophandler'));
-   this.completed = $("<div class='completed'>COMPLETED</div>").appendTo($('#dragandrophandler'));
-   $(".stubText").addClass("hidden");
-   obj.after(this.statusbar);
+function createStatusbar(objType, obj)  {
+  if (objType == 'material') {
+    this.filename = $("<div class='filename'></div>").appendTo($('#dragandrophandler'));
+    this.size = $("<div class='filesize'></div>").appendTo($('#dragandrophandler'));
+    this.progressBar = $("<div class='progressBar'><div></div></div>").appendTo($('#dragandrophandler'));
+    this.completed = $("<div class='completed'>COMPLETED</div>").appendTo($('#dragandrophandler'));
+  } else {
+    this.filename = $("<div class='filename'></div>").appendTo($('#dragandrophandlerSchedule'));
+    this.size = $("<div class='filesize'></div>").appendTo($('#dragandrophandlerSchedule'));
+    this.progressBar = $("<div class='progressBar'><div></div></div>").appendTo($('#dragandrophandlerSchedule'));
+    this.completed = $("<div class='completed'>COMPLETED</div>").appendTo($('#dragandrophandlerSchedule'));
+  }
+  $(".stubText").addClass("hidden");
+  obj.after(this.statusbar);
 
    this.setFileNameSize = function(name,size)
    {
@@ -97,22 +107,7 @@ function createStatusbar(obj)  {
  }
 }
 
-function handleFileUpload(files,obj){
-  filesToUpload = files;
-  statuses = [];
-  for (var i = 0; i < filesToUpload.length; i++) {
-    var status = new createStatusbar(obj); //Using this we can set progress.
-    status.setFileNameSize(filesToUpload[i].name,filesToUpload[i].size);
-    statuses[i] = status;
-  }  
-    $("#saveMaterialButton").on("click", function () {
-      for (var j = 0; j < filesToUpload.length; j++) {
-        sendFileToServer(filesToUpload[j],statuses[j],encodeURI(filesToUpload[j].name.split('.')[0]), filesToUpload[j].name.split('.').pop());
-      }
-    })
-}
-
-function addMaterialHandler() {
+function addMaterialButtonHandler() {
   $("[id$='addMaterialBlock']").css("display","none");
   
   $("#AddMaterialButton").on("click", function() {
@@ -122,6 +117,8 @@ function addMaterialHandler() {
     } else {
       $("[id$='addMaterialBlock']").css("display","none");
       $(this).html('ADD MATERIAL'); 
+      $("#saveMaterialButton").css("display","none");
+      $("[id$='materialName']")[0].value = '';
     }
   })
 }
@@ -145,7 +142,7 @@ function addMaterialBlockHandler() {
   });
 }
 
-function showMaterialsHandler() {
+function addMaterialsHandler() {
   obj = $("#dragandrophandler");
   $("[id$='selectMaterials']").on( "change", function() {
     $(".outerTable").css("display", "block");
@@ -172,22 +169,41 @@ function showMaterialsHandler() {
     var files = e.target.files;
     uploadFiles(files);
   });
+}
 
-  $(document).on('dragenter', function (e) {
+function addScheduleHandler() {
+  obj = $("#dragandrophandlerSchedule");
+
+  obj.on('dragenter', function (e) {
     e.stopPropagation();
     e.preventDefault();
+    $(this).css('border', '2px dotted #03AD44');
+    $(this).css('border-radius', '10px');
   });
 
-  $(document).on('dragover', function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    obj.css('border', '2px dotted #0B85A1');
-    obj.css('border-radius', '0px');
-  });
+  obj.on('dragover', function (e) {
+   e.stopPropagation();
+   e.preventDefault();
+ });
 
-  $(document).on('drop', function (e) {
-    e.stopPropagation();
-    e.preventDefault();
+  obj.on('drop', function (e) {
+    var files = e.originalEvent.dataTransfer.files;
+    if (files.length == '1') {
+      $("#saveScheduleButton")[0].removeAttribute("disabled");
+      uploadSchedule(files);
+    } else {
+      alert('You can add only one schedule on one date!');
+    }
+ });
+
+  $("#inpFileSchedule").on("change", function(e) {
+    var files = e.target.files;
+    if (files.length == '1') {
+      $("#saveScheduleButton")[0].removeAttribute("disabled");
+      uploadSchedule(files);
+    } else {
+      alert('You can add only one schedule on one date!');
+    }
   });
 }
 
@@ -195,33 +211,14 @@ function addScheduleButtonHandler() {
   $( "#addScheduleButton" ).on( "click", function() {
     if (this.value == 'Add Schedule') {
       $("#addScheduleBlock").css('display', 'block');
-      $( "#addScheduleButton" ).val('CANCEL');
+      $("#saveScheduleButton").removeClass("hidden");
+      $("#saveScheduleButton")[0].setAttribute("disabled", "true");
+      $("#addScheduleButton" ).val('CANCEL');
+      var today = new Date();
+      $("#sheduleDate")[0].value = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     } else {
       $("#addScheduleBlock").css('display', 'none');
       $( "#addScheduleButton" ).val('Add Schedule');
-    }
-  });
-}
-
-function checkEnableButton() {
-  $( "[id$='sheduleImg']"  ).on( "change", function() {
-    if ($("[id$='sheduleImg']")[0].files.length != 0) {
-      $("#saveScheduleButton")[0].removeAttribute("disabled");
-    } else {
-      $("#saveScheduleButton")[0].setAttribute("disabled", "true");
-    }
-  });
-}
-
-function saveSchedule(){
-  $("#saveScheduleButton").on( "click", function() {
-    if (confirm('Are you shure?')) {
-      callSaveSchedule();
-      return false;
-    } else {
-      event.preventDefault();
-      event.stopPropagation();
-      return false;
     }
   });
 }
@@ -232,14 +229,17 @@ function mainPageHandler() {
     $("[id$='schedulePage']").css('display', 'none');
     $("[id$='materialsPage']").css('display', 'none');
   });
+  
+  $( "#softhemeLogo" ).on( "click", function() {
+    location.reload();
+  });
 }
 
 function schedulePageHandler() {
-  var validFileExtensions = [".jpg", ".jpeg", ".bmp", ".gif", ".png"];   
-  validateExtention($("[id$='sheduleImg']"), validFileExtensions);
+  documentHandler();
+  clearDragAndDrop();
   addScheduleButtonHandler();
-  checkEnableButton();
-  saveSchedule();
+  addScheduleHandler();
   $( "#ScheduleButton" ).on( "click", function() {
     $("[id$='mainPage']").css('display', 'none');
     $("[id$='schedulePage']").css('display', 'block');
@@ -248,9 +248,10 @@ function schedulePageHandler() {
 }
 
 function materialPageHandler() {
-  addMaterialHandler();
+  clearDragAndDrop();
+  addMaterialButtonHandler();
   addMaterialBlockHandler();
-  showMaterialsHandler();
+  addMaterialsHandler();
   $( "#MaterialsButton" ).on( "click", function() {
     $("[id$='mainPage']").css('display', 'none');
     $("[id$='schedulePage']").css('display', 'none');
@@ -289,33 +290,73 @@ function uploadFiles(filesToUpload) {
   obj.css('border-radius', '0px');
   
   if (validationSucess) {
-    handleFileUpload(filesToUpload,obj);
+    var saveButton = $("#saveMaterialButton");
+    handleFileUpload('material', saveButton, filesToUpload, obj);
   }
 }
 
-function validateExtention(objectToValid, validExtention) {
-  objectToValid.on( "change", function() {
-        var oInput = this;
-        if (oInput.type == "file") {
-            var sFileName = oInput.value;
-            if (sFileName.length > 0) {
-                var blnValid = false;
-                for (var j = 0; j < validExtention.length; j++) {
-                    var sCurExtension = validExtention[j];
-                    if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
-                        blnValid = true;
-                        break;
-                    }
-                }
-                
-                if (!blnValid) {
-                    alert("Sorry, " + sFileName + " have invalid extension!!! Allowed extensions are: " + validExtention.join(", "));
-                    this.value = null;
-                    return false;
-                }
-            }
-        }
+function uploadSchedule(filesToUpload) {
+  var validFileExtensions = ["jpg", "jpeg", "png"];
+  var validationSucess = true;   
+  for (var i = 0; i < filesToUpload.length; i++) {
+    if (!validateExtentionOfFile(filesToUpload[i], validFileExtensions)) {
+      alert("Sorry, " + filesToUpload[i].name + " have invalid extension!!! Allowed extensions are: " + validFileExtensions.join(", "));
+      validationSucess = false;
+      $("#inpFileSchedule").removeAttr('type');
+      $("#inpFileSchedule").attr('type','file')
+      break;
+    }
+  } 
+  obj.css('border', '2px dotted #0B85A1');
+  obj.css('border-radius', '0px');
+  
+  if (validationSucess) {
+    var saveButton = $("#saveScheduleButton");
+    handleFileUpload('schedule', saveButton, filesToUpload,obj);
+  }
+}
+
+function handleFileUpload(fileType, saveButton, files,obj){
+  clearDragAndDrop();
+  var filesToUpload = files;
+  var statuses = [];
+  for (var i = 0; i < filesToUpload.length; i++) {
+    var status = new createStatusbar(fileType, obj); //Using this we can set progress.
+    status.setFileNameSize(filesToUpload[i].name,filesToUpload[i].size);
+    statuses[i] = status;
+  }  
+    saveButton.on("click", function () {
+      for (var j = 0; j < filesToUpload.length; j++) {
+        sendFileToServer(fileType, filesToUpload[j],statuses[j],encodeURI(filesToUpload[j].name.split('.')[0]), filesToUpload[j].name.split('.').pop());
+      }
+    })
+}
+
+function documentHandler() {
+  $(document).on('dragenter', function (e) {
+    e.stopPropagation();
+    e.preventDefault();
   });
+
+  $(document).on('dragover', function (e) {
+    e.stopPropagation();
+    e.preventDefault();
+    obj.css('border', '2px dotted #0B85A1');
+    obj.css('border-radius', '0px');
+  });
+
+  $(document).on('drop', function (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  });
+}
+
+function clearDragAndDrop() {
+  $( ".filename" ).remove();
+  $( ".filesize" ).remove();
+  $( ".progressBar" ).remove();
+  $( ".completed" ).remove();
+  $(".stubText").removeClass("hidden");
 }
 
 function validateExtentionOfFile(file, validExtention) {
@@ -328,7 +369,6 @@ function validateExtentionOfFile(file, validExtention) {
       break;
     }
   }
-
   if (!blnValid) {
     return false;
   }
