@@ -59,7 +59,7 @@
                         <input type="button" class="btn btn-primary checkPermission" value="Add Schedule" id="addScheduleButton"/>
                         <div id="addScheduleBlock">
 	                        <apex:actionRegion renderRegionOnly="false">
-	                        	<apex:actionFunction name="callSaveSchedule" action="{!saveSchedule}" status="initScheduleBlock" reRender="schedulePage"/>
+	                        	<apex:actionFunction name="callSaveSchedule" action="{!saveSchedule}" status="initScheduleBlock"/>
 	                        	<apex:outputLabel value="Date"  for="sheduledate"/>
 		                        <apex:input type="date" value="{!scheduleDateForSave}" required="true" id="sheduledate"/>
 		                        <input type="button" value="Save" disabled="true" id="saveScheduleButton"/>

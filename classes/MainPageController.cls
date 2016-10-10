@@ -123,7 +123,7 @@ global with sharing class MainPageController {
     	return null;
     }
 
-    public void saveSchedule() {
+    public PageReference saveSchedule() {
 		List<Schedule__c> scheduleToDelete = [SELECT Id FROM Schedule__c WHERE ScheduleDate__c =: scheduleDateForSave];
 		delete scheduleToDelete;
 		schedule.ScheduleDate__c = scheduleDateForSave;
@@ -132,11 +132,7 @@ global with sharing class MainPageController {
         insert attachedFile;  
         schedule = new Schedule__c();
         attachedFile = New Attachment();
-    	//return null;
-    }
-
-    public void action() {
-        System.debug(loggingLevel.Error, '*** object: ' + attachedFile);
+    	return null;
     }
 
 	public PageReference removeNotation(){	
