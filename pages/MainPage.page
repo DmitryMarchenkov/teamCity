@@ -1,18 +1,12 @@
-<apex:page controller="MainPageController" showHeader="false" standardStylesheets="false" docType="HTML-5.0">
+<apex:page controller="MainPageController" showHeader="false" standardStylesheets="false" docType="HTML-5.0" title="Internship 2016">
 	<apex:stylesheet value="{!URLFOR($Resource.styles)}"/>
 	<apex:stylesheet value="{!URLFOR($Resource.Bootstrap)}"/>
 
 	<apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
 	<apex:includeScript value="{!URLFOR($Resource.JavaScript)}"/>
-
 	<div id="sessionId" class="hidden">{!$Api.Session_Id}</div>
 	<div id="permission" class="hidden">{!$Permission.Manage_AddDelete}</div>
-<!-- 	<apex:stylesheet value="{!URLFOR($Resource.InternshipResource, 'css/bootstrap.css')}"/>
-	<apex:stylesheet value="{!URLFOR($Resource.InternshipResource, 'css/styles.css')}"/>
-
-	<apex:includescript value="{!URLFOR($Resource.InternshipResource, 'js/jQuery.js')}"/>
-	<apex:includescript value="{!URLFOR($Resource.InternshipResource, 'js/script.js')}"/> -->
-
+	
 	<div class="container-fluid">
 	  	<div class="row">
 
@@ -27,6 +21,9 @@
 
                 <div id="sfLogo">
                     <img  src="https://login.salesforce.com/img/logo198.png"/>
+					<button id="logoutBtn" class="btn btn-info" onclick="location.href='/secur/logout.jsp'">
+				        Logout
+				    </button>
                 </div>
 	  		</div>
 
@@ -40,7 +37,7 @@
 	  			<apex:outputPanel id="mainPage">
 					<apex:form>	  				
 		  				MAIN PAGE
-		  				<h2>Schedule for today!</h2>
+		  				<h2>Schedule for today{!mainPageTitle}!</h2>
 		  				<div class="scheduleImg">
                         	<apex:image url="/servlet/servlet.FileDownload?file={!scheduleImg.Id}" rendered="{!showScheduleFlag}"/>
                         </div>
@@ -61,11 +58,11 @@
 
                         <input type="button" class="btn btn-primary checkPermission" value="Add Schedule" id="addScheduleButton"/>
                         <div id="addScheduleBlock">
-	                        <apex:actionRegion>
-	                        	<apex:actionFunction name="callSaveSchedule" action="{!saveSchedule}" status="initScheduleBlock"/>
+	                        <apex:actionRegion renderRegionOnly="false">
+	                        	<apex:actionFunction name="callSaveSchedule" action="{!saveSchedule}" status="initScheduleBlock" reRender="schedulePage"/>
 	                        	<apex:outputLabel value="Date"  for="sheduledate"/>
 		                        <apex:input type="date" value="{!scheduleDateForSave}" required="true" id="sheduledate"/>
-		                        <input type="button" value="Save" disabled="true" id="saveScheduleButton" />
+		                        <input type="button" value="Save" disabled="true" id="saveScheduleButton"/>
 	                        </apex:actionRegion>
 	                        <apex:inputFile value="{!attachedFile.body}" filename="{!attachedFile.Name}" id="sheduleImg" accept="image/*"/>
                         </div>
@@ -135,6 +132,7 @@
 	                    </div> 
 
 	                    <button type="button" class="btn btn-primary checkPermission" id="AddMaterialButton">ADD MATERIAL</button>
+	                    <button type="button" class="btn btn-info checkPermission" id="saveMaterialButton">SAVE</button>
 
 	                    <div id="addMaterialBlock">
 	                    	<table class="table table-condensed borderless">
@@ -155,9 +153,6 @@
 			  				<div id="dragandrophandler">
 						        <div class="stubText">or drop file(s) here to attach them to the object<br/></div>			     
 						        <div class="stubText small"> <br/></div>
-
-						        <apex:param name="parentId"  assignTo="{!objectIdString}" value=""/>
-						        <apex:param name="IsDocument"  assignTo="{!isDoc}" value="true"/> 
 						    </div>
 	                    </div>
 	                    <apex:actionStatus id="initMaterialBlock" onstop="materialPageHandler();checkIfExistMaterials();checkPermission();"/>

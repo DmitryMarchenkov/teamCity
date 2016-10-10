@@ -1,5 +1,4 @@
 jQuery(document).ready(function() {
-
   checkPermission();
   mainPageHandler();
   schedulePageHandler();
@@ -16,43 +15,52 @@ function sendFileToServer(formData,status, filename, fileres){
   var materialName = $("#materialName").val();
   var materialTheme = $("[id$='materialTheme'] option:selected").text();
 
-  var uploadURL = 'https://' + sfdcHostName + '.salesforce.com/services/apexrest/DragAndDrop/v1?FileName=' + filename + '&FileResolution=' + fileres + '&MaterialName=' + materialName + '&MaterialTheme=' + materialTheme;
-    var jqXHR=$.ajax({
-      xhr: function() {
-        var xhrobj = $.ajaxSettings.xhr();
-        if (xhrobj.upload) {
-          xhrobj.upload.addEventListener('progress', function(event) {
-            var percent = 0;
-            var position = event.loaded || event.position;
-            var total = event.total;
-            if (event.lengthComputable) {
-              percent = Math.ceil(position / total * 100);
-            }
-              //Set progress
-            status.setProgress(percent);
-          }, false);
-        }
-        return xhrobj;
-      },
-      url: '/services/proxy',
-      beforeSend: function(xhr) {
-       xhr.setRequestHeader('SalesforceProxy-Endpoint', uploadURL);
-       var sfdcSessionId = $('#sessionId').html();
-       xhr.setRequestHeader('Authorization', ' Bearer ' + sfdcSessionId);
-       xhr.setRequestHeader('X-User-Agent', 'MyClient');
-     },
-     type: "POST",
-     contentType: null,
-     crossDomain: true,
+  $("#AddMaterialButton").on('click', function() {
+    jqXHR.abort();
+    $( ".filename" ).remove();
+    $( ".filesize" ).remove();
+    $( ".progressBar" ).remove();
+    $( ".completed" ).remove();
+    $(".stubText").removeClass("hidden");
+  });
 
-     processData: false,
-     cache: false,
-     data: formData,
-     success: function(data){
-       status.setProgress(100);     
-     },       
-   }); 
-  }
+  var uploadURL = 'https://' + sfdcHostName + '.salesforce.com/services/apexrest/DragAndDrop/v1?FileName=' + filename + '&FileResolution=' + fileres + '&MaterialName=' + materialName + '&MaterialTheme=' + materialTheme;
+  var jqXHR=$.ajax({
+    xhr: function() {
+      var xhrobj = $.ajaxSettings.xhr();
+      if (xhrobj.upload) {
+        xhrobj.upload.addEventListener('progress', function(event) {
+          var percent = 0;
+          var position = event.loaded || event.position;
+          var total = event.total;
+          if (event.lengthComputable) {
+            percent = Math.ceil(position / total * 100);
+          }
+            //Set progress
+          status.setProgress(percent);
+        }, false);
+      }
+      return xhrobj;
+    },
+    url: '/services/proxy',
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('SalesforceProxy-Endpoint', uploadURL);
+      var sfdcSessionId = $('#sessionId').html();
+      xhr.setRequestHeader('Authorization', ' Bearer ' + sfdcSessionId);
+      xhr.setRequestHeader('X-User-Agent', 'MyClient');
+    },
+    type: "POST",
+    contentType: null,
+    crossDomain: true,
+
+    processData: false,
+    cache: false,
+    data: formData,
+    success: function(data, textStatus){
+      status.setProgress(100);     
+    },       
+  }); 
+}
 
 function createStatusbar(obj)  {
    this.filename = $("<div class='filename'></div>").appendTo($('#dragandrophandler'));
@@ -91,27 +99,17 @@ function createStatusbar(obj)  {
 
 function handleFileUpload(files,obj){
   filesToUpload = files;
-
+  statuses = [];
   for (var i = 0; i < filesToUpload.length; i++) {
-    fd = new FormData();
-    fd.append('file', filesToUpload[i]);
-
     var status = new createStatusbar(obj); //Using this we can set progress.
     status.setFileNameSize(filesToUpload[i].name,filesToUpload[i].size);
-      sendFileToServer(fd,status,encodeURI(filesToUpload[i].name.split('.')[0]), filesToUpload[i].name.split('.').pop());
+    statuses[i] = status;
   }  
-}
-
-function readURL(input, obj) {
-  if (input.files && input.files[0]) {
-    var reader = new FileReader();
-    reader.readAsDataURL(input.files[0]);
-
-    reader.onload = function (e) {
-      $('#blah').attr('src', e.target.result);
-      handleFileUpload(e.target.result, obj);
-    }
-  }
+    $("#saveMaterialButton").on("click", function () {
+      for (var j = 0; j < filesToUpload.length; j++) {
+        sendFileToServer(filesToUpload[j],statuses[j],encodeURI(filesToUpload[j].name.split('.')[0]), filesToUpload[j].name.split('.').pop());
+      }
+    })
 }
 
 function addMaterialHandler() {
@@ -130,26 +128,25 @@ function addMaterialHandler() {
 
 function addMaterialBlockHandler() {
   $("#inpFile").css("display","none");
-  $("#saveButton").css("display","none");
+  $("#saveMaterialButton").css("display","none");
   $("[id$='dragandrophandler']").css("display","none");
   
   $( "[id$='materialName']"  ).on( "keyup", function() {
     if ($("[id$='materialName']").val() != '') {
       $("#inpFile").css("display","block");
-      $("#saveButton").css("display","inline-block");
+      $("#saveMaterialButton").css("display","inline-block");
       $("[id$='dragandrophandler']").css("display","block");
     }
     else { 
       $("#inpFile").css("display","none");
-      $("#saveButton").css("display","none");
+      $("#saveMaterialButton").css("display","none");
       $("[id$='dragandrophandler']").css("display","none");
     }
   });
 }
 
 function showMaterialsHandler() {
-  var obj = $("#dragandrophandler");
-
+  obj = $("#dragandrophandler");
   $("[id$='selectMaterials']").on( "change", function() {
     $(".outerTable").css("display", "block");
   });
@@ -159,7 +156,6 @@ function showMaterialsHandler() {
     e.preventDefault();
     $(this).css('border', '2px dotted #03AD44');
     $(this).css('border-radius', '10px');
-
   });
 
   obj.on('dragover', function (e) {
@@ -168,21 +164,13 @@ function showMaterialsHandler() {
  });
 
   obj.on('drop', function (e) {
-   $(this).css('border', '2px dotted #0B85A1');
-   $(this).css('border-radius', '0px');
-   e.preventDefault();
-   var files = e.originalEvent.dataTransfer.files;
-
-   handleFileUpload(files,obj);
+    var files = e.originalEvent.dataTransfer.files;
+    uploadFiles(files);
  });
 
   $("#inpFile").on("change", function(e) {
-     obj.css('border', '2px dotted #0B85A1');
-     obj.css('border-radius', '0px');
-     event.preventDefault();
-
-     var files = e.target.files;
-     handleFileUpload(files,obj);
+    var files = e.target.files;
+    uploadFiles(files);
   });
 
   $(document).on('dragenter', function (e) {
@@ -227,7 +215,14 @@ function checkEnableButton() {
 
 function saveSchedule(){
   $("#saveScheduleButton").on( "click", function() {
-    callSaveSchedule();
+    if (confirm('Are you shure?')) {
+      callSaveSchedule();
+      return false;
+    } else {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    }
   });
 }
 
@@ -240,7 +235,8 @@ function mainPageHandler() {
 }
 
 function schedulePageHandler() {
-  validateExtention();
+  var validFileExtensions = [".jpg", ".jpeg", ".bmp", ".gif", ".png"];   
+  validateExtention($("[id$='sheduleImg']"), validFileExtensions);
   addScheduleButtonHandler();
   checkEnableButton();
   saveSchedule();
@@ -277,16 +273,35 @@ function checkPermission() {
   }
 }
 
-function validateExtention() {
-  $("[id$='sheduleImg']").on( "change", function() {
-  var _validFileExtensions = [".jpg", ".jpeg", ".bmp", ".gif", ".png"];    
+function uploadFiles(filesToUpload) {
+  var validFileExtensions = ["pdf", "docx", "doc", "txt", "rar", "zip", "rtf", "jpg", "jpeg", "png"];
+  var validationSucess = true;   
+  for (var i = 0; i < filesToUpload.length; i++) {
+    if (!validateExtentionOfFile(filesToUpload[i], validFileExtensions)) {
+      alert("Sorry, " + filesToUpload[i].name + " have invalid extension!!! Allowed extensions are: " + validFileExtensions.join(", "));
+      validationSucess = false;
+      $("#inpFile").removeAttr('type');
+      $("#inpFile").attr('type','file')
+      break;
+    }
+  } 
+  obj.css('border', '2px dotted #0B85A1');
+  obj.css('border-radius', '0px');
+  
+  if (validationSucess) {
+    handleFileUpload(filesToUpload,obj);
+  }
+}
+
+function validateExtention(objectToValid, validExtention) {
+  objectToValid.on( "change", function() {
         var oInput = this;
         if (oInput.type == "file") {
             var sFileName = oInput.value;
             if (sFileName.length > 0) {
                 var blnValid = false;
-                for (var j = 0; j < _validFileExtensions.length; j++) {
-                    var sCurExtension = _validFileExtensions[j];
+                for (var j = 0; j < validExtention.length; j++) {
+                    var sCurExtension = validExtention[j];
                     if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
                         blnValid = true;
                         break;
@@ -294,10 +309,28 @@ function validateExtention() {
                 }
                 
                 if (!blnValid) {
-                    alert("Sorry, " + sFileName + " have invalid extension!!! Allowed extensions are: " + _validFileExtensions.join(", "));
+                    alert("Sorry, " + sFileName + " have invalid extension!!! Allowed extensions are: " + validExtention.join(", "));
                     this.value = null;
+                    return false;
                 }
             }
         }
   });
+}
+
+function validateExtentionOfFile(file, validExtention) {
+  var blnValid = false;
+  var fileName = file.name;
+  for (var i = 0; i < validExtention.length; i++) {
+    var sCurExtension = validExtention[i];
+    if (fileName.substr(fileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
+      blnValid = true;
+      break;
+    }
+  }
+
+  if (!blnValid) {
+    return false;
+  }
+  return true;
 }

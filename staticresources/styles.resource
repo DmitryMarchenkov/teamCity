@@ -20,10 +20,20 @@
     width: 28%;
 }
 
+#sfLogo img{
+    right: 40px;
+    position: relative;
+}
+
 #header img {
     height: 100px;
 }
 
+#logoutBtn {
+    top: 0px;
+    right: 0px;
+    position: absolute;
+}
 
 /*-------------------------------------------*/
 

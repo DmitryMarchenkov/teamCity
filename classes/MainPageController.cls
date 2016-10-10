@@ -11,6 +11,7 @@ global with sharing class MainPageController {
     public Attachment scheduleImg {get; set;}
     public Boolean showScheduleFlag {get; set;}
     public Schedule__c schedule {get; set;}
+    public String mainPageTitle {get; set;}
     public Attachment attachedFile {
         get {
             if (attachedFile == null)
@@ -31,12 +32,11 @@ global with sharing class MainPageController {
 
     public PageReference showMaterials() {
         materialsWithAttachment = new Map<Id, List<Attachment>>();
-        Set<Id> materialsIds = new Set<Id>();
+        Map<Id, Material__c> materialsMap = new Map<Id, Material__c>([SELECT Id, Name FROM Material__c WHERE Theme__c = :selectedTheme ORDER BY Name]);
+        
+        Set<Id> materialsIds = materialsMap.keySet();
+        materials = materialsMap.values();
 
-        materials = [SELECT Id, Name FROM Material__c WHERE Theme__c = :selectedTheme ORDER BY Name];
-        for(Material__c material: materials) {
-            materialsIds.add(material.Id);
-        }
         for(Attachment attachment: [SELECT Id, ParentId, Name FROM Attachment WHERE ParentId IN :materialsIds]) {
         	if(materialsWithAttachment.containsKey(attachment.ParentId)) {
         		materialsWithAttachment.get(attachment.ParentId).add(attachment);
@@ -76,7 +76,11 @@ global with sharing class MainPageController {
     		showScheduleFlag = false;
     		scheduleImg = null;
     		addErrorMessage('Schedule on this date does not exist!');
-    	}
+    	} finally {
+            if(!showScheduleFlag) {
+                mainPageTitle = ' does not exist ';
+            }
+        }
     	return null;
     }
 
@@ -119,7 +123,7 @@ global with sharing class MainPageController {
     	return null;
     }
 
-    public PageReference saveSchedule() {
+    public void saveSchedule() {
 		List<Schedule__c> scheduleToDelete = [SELECT Id FROM Schedule__c WHERE ScheduleDate__c =: scheduleDateForSave];
 		delete scheduleToDelete;
 		schedule.ScheduleDate__c = scheduleDateForSave;
@@ -128,7 +132,11 @@ global with sharing class MainPageController {
         insert attachedFile;  
         schedule = new Schedule__c();
         attachedFile = New Attachment();
-    	return null;
+    	//return null;
+    }
+
+    public void action() {
+        System.debug(loggingLevel.Error, '*** object: ' + attachedFile);
     }
 
 	public PageReference removeNotation(){	
