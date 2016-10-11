@@ -214,8 +214,9 @@ function addScheduleButtonHandler() {
       $("#saveScheduleButton").removeClass("hidden");
       $("#saveScheduleButton")[0].setAttribute("disabled", "true");
       $("#addScheduleButton" ).val('CANCEL');
-      var today = new Date();
-      $("#sheduleDate")[0].value = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+      dateToday($("#sheduleDate"));
+      // var today = new Date();
+      // $("#sheduleDate")[0].value = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     } else {
       $("#addScheduleBlock").css('display', 'none');
       $( "#addScheduleButton" ).val('Add Schedule');
@@ -240,6 +241,7 @@ function schedulePageHandler() {
   clearDragAndDrop();
   addScheduleButtonHandler();
   addScheduleHandler();
+  setScheduleDate();
   $( "#ScheduleButton" ).on( "click", function() {
     $("[id$='mainPage']").css('display', 'none');
     $("[id$='schedulePage']").css('display', 'block');
@@ -373,4 +375,21 @@ function validateExtentionOfFile(file, validExtention) {
     return false;
   }
   return true;
+}
+
+function setScheduleDate() {
+  $("#sheduleDate").on('change', function() {
+    // debugger;
+    if ($("#sheduleDate")[0].value == '') {
+      alert("You can not ass schedule without date!");
+      dateToday($("#sheduleDate"));
+      // var today = new Date();
+      // $("#sheduleDate")[0].value = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+    }
+  });
+}
+
+function dateToday(dateField) {
+  var today = new Date();
+  dateField[0].value = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
 }

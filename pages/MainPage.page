@@ -62,7 +62,6 @@
                         <div id="addScheduleBlock">
                         	<apex:outputLabel value="Date" for="sheduleDate"/>	
 							<input type="date" id="sheduleDate"/>
-
 	                        <input type="file" id="inpFileSchedule"/>
 			  				<div id="dragandrophandlerSchedule">
 						        <div class="stubText">or drop file(s) here to attach them to the object<br/></div>			     
