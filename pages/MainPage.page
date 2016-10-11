@@ -27,13 +27,13 @@
                 </div>
 	  		</div>
 
-  			<div id="navbar" class="col-xs-2 col-md-2">
+  			<div id="navbar" class="col-xs-12 col-md-2">
 		  		<button type="button" id="MainButton" class="btn btn-success col-md-12 btn-lg">Main</button>
 		  		<button type="button" id="ScheduleButton" class="btn btn-success col-md-12 btn-lg">Schedule</button>
 		  		<button type="button" id="MaterialsButton" class="btn btn-success col-md-12 btn-lg">Materials</button>		
 	  		</div>
 
-	  		<div id="content" class="col-xs-8 col-md-8">
+	  		<div id="content" class="col-xs-12 col-md-8">
 	  			<apex:outputPanel id="mainPage">
 					<apex:form>	  				
 		  				MAIN PAGE
@@ -47,26 +47,26 @@
 	  			<apex:outputPanel id="schedulePage">
 					<apex:form>
 		  				SCHEDULE PAGE
-		  				<div>
-		  					<apex:pageMessages ></apex:pageMessages>
-                        	<apex:actionRegion>
+		  				<div class="row">
+		  					<div class="col-xs-12 col-md-6" id="scheduleLeftBlock">
 			  					<apex:outputLabel value="Schedule Date "  for="scheduleDateShowOnPage"/>
 	                            <apex:input type="date" value="{!scheduleDate}" required="true" id="scheduleDate"/>
-                            	<apex:commandButton value="Show Schedule" action="{!showSchedule}" reRender="schedulePage" status="initScheduleBlock"/>
-                        	</apex:actionRegion>
-                        </div>
-                    	<apex:actionFunction name="rerenderSchedule" action="{!showSchedule}" reRender="schedulePage" status="initScheduleBlock"/>
-
-                        <input type="button" class="btn btn-primary checkPermission" value="Add Schedule" id="addScheduleButton"/>
-                        <input type="button" class="btn btn-info checkPermission hidden" value="Save" id="saveScheduleButton"/>
-                        <div id="addScheduleBlock">
-                        	<apex:outputLabel value="Date" for="sheduleDate"/>	
-							<input type="date" id="sheduleDate"/>
-	                        <input type="file" id="inpFileSchedule"/>
-			  				<div id="dragandrophandlerSchedule">
-						        <div class="stubText">or drop file(s) here to attach them to the object<br/></div>			     
-						        <div class="stubText small"> <br/></div>
-						    </div>
+	                        	<apex:commandButton value="Show Schedule" action="{!showSchedule}" reRender="schedulePage" status="initScheduleBlock"/>
+		                    	<apex:actionFunction name="rerenderSchedule" action="{!showSchedule}" reRender="schedulePage" status="initScheduleBlock"/>
+		                    	<br></br>
+		                        <input type="button" class="btn btn-primary checkPermission" value="Add Schedule" id="addScheduleButton"/>
+		                        <input type="button" class="btn btn-info checkPermission hidden" value="Save" id="saveScheduleButton"/>
+			  					<apex:pageMessages ></apex:pageMessages>
+		  					</div>
+	                        <div id="addScheduleBlock" class="col-xs-12 col-md-6">
+	                        	<apex:outputLabel value="Date" for="sheduleDate"/>	
+								<input type="date" id="sheduleDate"/>
+		                        <input type="file" id="inpFileSchedule"/>
+				  				<div id="dragandrophandlerSchedule">
+							        <div class="stubText">or drop file(s) here to attach them to the object<br/></div>			     
+							        <div class="stubText small"> <br/></div>
+							    </div>
+	                        </div>
                         </div>
 
                         <div class="scheduleImg">
@@ -163,7 +163,7 @@
 	  			</apex:outputPanel>
 	  		</div>
 
-	  		<div id="notation" class="col-xs-2 col-md-2">
+	  		<div id="notation" class="col-xs-12 col-md-2">
 	  			<apex:outputPanel id="notationPanel">
 		  			<h2>Notations</h2>
 					<apex:form>

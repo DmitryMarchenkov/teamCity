@@ -36,7 +36,6 @@ function sendFileToServer(objType, formData,status, filename, fileres){
           if (event.lengthComputable) {
             percent = Math.ceil(position / total * 100);
           }
-            //Set progress
           status.setProgress(percent);
         }, false);
       }
@@ -109,7 +108,6 @@ function createStatusbar(objType, obj)  {
 
 function addMaterialButtonHandler() {
   $("[id$='addMaterialBlock']").css("display","none");
-  
   $("#AddMaterialButton").on("click", function() {
     if (this.innerHTML == 'ADD MATERIAL') {
       $("[id$='addMaterialBlock']").css("display","block");
@@ -127,7 +125,6 @@ function addMaterialBlockHandler() {
   $("#inpFile").css("display","none");
   $("#saveMaterialButton").css("display","none");
   $("[id$='dragandrophandler']").css("display","none");
-  
   $( "[id$='materialName']"  ).on( "keyup", function() {
     if ($("[id$='materialName']").val() != '') {
       $("#inpFile").css("display","block");
@@ -142,69 +139,106 @@ function addMaterialBlockHandler() {
   });
 }
 
-function addMaterialsHandler() {
-  obj = $("#dragandrophandler");
-  $("[id$='selectMaterials']").on( "change", function() {
-    $(".outerTable").css("display", "block");
-  });
+function addAttachmentHandler(fileType) {
+  debugger;
+  if (fileType == 'material') {
+    obj = $("#dragandrophandler");
+    $("[id$='selectMaterials']").on( "change", function() {
+      $(".outerTable").css("display", "block");
+    });
 
-  obj.on('dragenter', function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    $(this).css('border', '2px dotted #03AD44');
-    $(this).css('border-radius', '10px');
-  });
+    obj.on('dragenter', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      $(this).css('border', '2px dotted #03AD44');
+      $(this).css('border-radius', '10px');
+    });
 
-  obj.on('dragover', function (e) {
-   e.stopPropagation();
-   e.preventDefault();
- });
+    obj.on('dragover', function (e) {
+     e.stopPropagation();
+     e.preventDefault();
+   });
 
-  obj.on('drop', function (e) {
-    var files = e.originalEvent.dataTransfer.files;
-    uploadFiles(files);
- });
+    obj.on('drop', function (e) {
+      var files = e.originalEvent.dataTransfer.files;
+      var validFileExtensions = ["pdf", "docx", "doc", "txt", "rar", "zip", "rtf", "jpg", "jpeg", "png"];
+      var inputFile = $("#inpFile");
+      var saveButton = $("#saveMaterialButton");
+      uploadFiles('material', files, validFileExtensions, inputFile, saveButton);
+   });
 
-  $("#inpFile").on("change", function(e) {
-    var files = e.target.files;
-    uploadFiles(files);
-  });
+    $("#inpFile").on("change", function(e) {
+      var files = e.target.files;
+      var validFileExtensions = ["pdf", "docx", "doc", "txt", "rar", "zip", "rtf", "jpg", "jpeg", "png"];
+      var inputFile = $("#inpFile");
+      var saveButton = $("#saveMaterialButton");
+      uploadFiles('material', files, validFileExtensions, inputFile, saveButton);
+    });
+  }
+
+
+  if (fileType == 'schedule') {
+    obj = $("#dragandrophandlerSchedule");
+    obj = $("#dragandrophandlerSchedule");
+
+    obj.on('dragenter', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      $(this).css('border', '2px dotted #03AD44');
+      $(this).css('border-radius', '10px');
+    });
+
+    obj.on('dragover', function (e) {
+     e.stopPropagation();
+     e.preventDefault();
+   });
+
+    obj.on('drop', function (e) {
+      var files = e.originalEvent.dataTransfer.files;
+      if (files.length == '1') {
+        $("#saveScheduleButton")[0].removeAttribute("disabled");
+
+        var validFileExtensions = ["jpg", "jpeg", "png"];
+        var inputFile = $("#inpFileSchedule")
+        var saveButton = $("#saveScheduleButton");
+        uploadFiles('schedule', files, validFileExtensions, inputFile, saveButton);
+      } else {
+        alert('You can add only one schedule on one date!');
+      }
+   });
+
+    $("#inpFileSchedule").on("change", function(e) {
+      var files = e.target.files;
+      if (files.length == '1') {
+        $("#saveScheduleButton")[0].removeAttribute("disabled");
+        var validFileExtensions = ["jpg", "jpeg", "png"];
+        var inputFile = $("#inpFileSchedule")
+        var saveButton = $("#saveScheduleButton");
+        uploadFiles('schedule', files, validFileExtensions, inputFile, saveButton);
+      } else {
+        alert('You can add only one schedule on one date!');
+      }
+    });
+  }
 }
 
-function addScheduleHandler() {
-  obj = $("#dragandrophandlerSchedule");
-
-  obj.on('dragenter', function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    $(this).css('border', '2px dotted #03AD44');
-    $(this).css('border-radius', '10px');
-  });
-
-  obj.on('dragover', function (e) {
-   e.stopPropagation();
-   e.preventDefault();
- });
-
-  obj.on('drop', function (e) {
-    var files = e.originalEvent.dataTransfer.files;
-    if (files.length == '1') {
-      $("#saveScheduleButton")[0].removeAttribute("disabled");
-      uploadSchedule(files);
-    } else {
-      alert('You can add only one schedule on one date!');
+function uploadFiles(fileType, filesToUpload, validFileExtensions, inputFile, saveButton) {
+  var validationSucess = true;   
+  for (var i = 0; i < filesToUpload.length; i++) {
+    if (!validateExtentionOfFile(filesToUpload[i], validFileExtensions)) {
+      alert("Sorry, " + filesToUpload[i].name + " have invalid extension!!! Allowed extensions are: " + validFileExtensions.join(", "));
+      validationSucess = false;
+      inputFile.removeAttr('type');
+      inputFile.attr('type','file')
+      break;
     }
- });
-
-  $("#inpFileSchedule").on("change", function(e) {
-    var files = e.target.files;
-    if (files.length == '1') {
-      $("#saveScheduleButton")[0].removeAttribute("disabled");
-      uploadSchedule(files);
-    } else {
-      alert('You can add only one schedule on one date!');
-    }
-  });
+  } 
+  obj.css('border', '2px dotted #0B85A1');
+  obj.css('border-radius', '0px');
+  
+  if (validationSucess) {
+    handleFileUpload(fileType, saveButton, filesToUpload, obj);
+  }
 }
 
 function addScheduleButtonHandler() {
@@ -215,9 +249,8 @@ function addScheduleButtonHandler() {
       $("#saveScheduleButton")[0].setAttribute("disabled", "true");
       $("#addScheduleButton" ).val('CANCEL');
       dateToday($("#sheduleDate"));
-      // var today = new Date();
-      // $("#sheduleDate")[0].value = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     } else {
+      $("#saveScheduleButton").addClass("hidden");
       $("#addScheduleBlock").css('display', 'none');
       $( "#addScheduleButton" ).val('Add Schedule');
     }
@@ -240,7 +273,7 @@ function schedulePageHandler() {
   documentHandler();
   clearDragAndDrop();
   addScheduleButtonHandler();
-  addScheduleHandler();
+  addAttachmentHandler('schedule');
   setScheduleDate();
   $( "#ScheduleButton" ).on( "click", function() {
     $("[id$='mainPage']").css('display', 'none');
@@ -253,7 +286,7 @@ function materialPageHandler() {
   clearDragAndDrop();
   addMaterialButtonHandler();
   addMaterialBlockHandler();
-  addMaterialsHandler();
+  addAttachmentHandler('material');
   $( "#MaterialsButton" ).on( "click", function() {
     $("[id$='mainPage']").css('display', 'none');
     $("[id$='schedulePage']").css('display', 'none');
@@ -273,48 +306,6 @@ function checkIfExistMaterials() {
 function checkPermission() {
   if ($("#permission").text() == 'true') {
     $(".checkPermission").css("display", "none");
-  }
-}
-
-function uploadFiles(filesToUpload) {
-  var validFileExtensions = ["pdf", "docx", "doc", "txt", "rar", "zip", "rtf", "jpg", "jpeg", "png"];
-  var validationSucess = true;   
-  for (var i = 0; i < filesToUpload.length; i++) {
-    if (!validateExtentionOfFile(filesToUpload[i], validFileExtensions)) {
-      alert("Sorry, " + filesToUpload[i].name + " have invalid extension!!! Allowed extensions are: " + validFileExtensions.join(", "));
-      validationSucess = false;
-      $("#inpFile").removeAttr('type');
-      $("#inpFile").attr('type','file')
-      break;
-    }
-  } 
-  obj.css('border', '2px dotted #0B85A1');
-  obj.css('border-radius', '0px');
-  
-  if (validationSucess) {
-    var saveButton = $("#saveMaterialButton");
-    handleFileUpload('material', saveButton, filesToUpload, obj);
-  }
-}
-
-function uploadSchedule(filesToUpload) {
-  var validFileExtensions = ["jpg", "jpeg", "png"];
-  var validationSucess = true;   
-  for (var i = 0; i < filesToUpload.length; i++) {
-    if (!validateExtentionOfFile(filesToUpload[i], validFileExtensions)) {
-      alert("Sorry, " + filesToUpload[i].name + " have invalid extension!!! Allowed extensions are: " + validFileExtensions.join(", "));
-      validationSucess = false;
-      $("#inpFileSchedule").removeAttr('type');
-      $("#inpFileSchedule").attr('type','file')
-      break;
-    }
-  } 
-  obj.css('border', '2px dotted #0B85A1');
-  obj.css('border-radius', '0px');
-  
-  if (validationSucess) {
-    var saveButton = $("#saveScheduleButton");
-    handleFileUpload('schedule', saveButton, filesToUpload,obj);
   }
 }
 
@@ -379,12 +370,9 @@ function validateExtentionOfFile(file, validExtention) {
 
 function setScheduleDate() {
   $("#sheduleDate").on('change', function() {
-    // debugger;
     if ($("#sheduleDate")[0].value == '') {
       alert("You can not ass schedule without date!");
       dateToday($("#sheduleDate"));
-      // var today = new Date();
-      // $("#sheduleDate")[0].value = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     }
   });
 }

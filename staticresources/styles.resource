@@ -164,6 +164,14 @@ table td {
 #addScheduleBlock {
     display: none;
 }
+
+#scheduleLeftBlock { 
+    min-height: 170px;
+}
+
+#saveScheduleButton,#addScheduleButton {
+    margin-top: 20px;
+}
 /*-------------------------------------------*/
 
 footer {
@@ -178,7 +186,17 @@ footer {
     
     #header img {
         display: none;
-    }    
+    }  
+    #scheduleLeftBlock {
+        min-height: 0px; 
+    }  
+    #navbar button {
+        width: 32%;
+    }
+    #saveScheduleButton, #addScheduleButton {
+        margin-bottom: 20px;
+        margin-top: 0px;
+    }
 }
 
 
