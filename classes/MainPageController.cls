@@ -1,5 +1,4 @@
 global with sharing class MainPageController {
-
 	public String selectedTheme { get;set; }
 	public String inputNotation { get;set; }
 	public List<SelectOption> statusOptionsTheme { get;set; }
@@ -22,7 +21,6 @@ global with sharing class MainPageController {
     public PageReference showMaterials() {
         materialsWithAttachment = new Map<Id, List<Attachment>>();
         Map<Id, Material__c> materialsMap = new Map<Id, Material__c>([SELECT Id, Name FROM Material__c WHERE Theme__c = :selectedTheme ORDER BY Name]);
-        
         Set<Id> materialsIds = materialsMap.keySet();
         materials = materialsMap.values();
 
@@ -35,7 +33,6 @@ global with sharing class MainPageController {
             	materialsWithAttachment.put(attachment.ParentId, attachments);
         	}
         }
-        
         removeMaterialsWithoutAttachment();
         return null;
     }
@@ -91,7 +88,6 @@ global with sharing class MainPageController {
 
     private List<SelectOption> getPicklistValues(Schema.DescribeFieldResult statusFieldDescription) {
     	List<SelectOption> tmpStatusOptions = new List<SelectOption>();
-
     	for (Schema.Picklistentry picklistEntry : statusFieldDescription.getPicklistValues())
         {
             tmpStatusOptions.add(new SelectOption(pickListEntry.getValue(),pickListEntry.getLabel()));

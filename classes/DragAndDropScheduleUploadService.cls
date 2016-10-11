@@ -22,14 +22,11 @@ global with sharing class DragAndDropScheduleUploadService
 		Schedule__c schedule = new Schedule__c();
 		schedule.ScheduleDate__c = scheduleDate;
 		insert schedule;
-		Id parentId = schedule.Id;
 
+		Id parentId = schedule.Id;
 		Attachment attachment = new Attachment (ParentId = parentId,
                                    Body = postContent,
                                    Name = fName+fRes);
-
 		insert attachment;
-		System.debug(loggingLevel.Error, '*** schedule: ' + schedule);
-		System.debug(loggingLevel.Error, '*** attachment: ' + attachment);
    }
 }

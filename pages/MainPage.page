@@ -36,7 +36,6 @@
 	  		<div id="content" class="col-xs-12 col-md-8">
 	  			<apex:outputPanel id="mainPage">
 					<apex:form>	  				
-		  				MAIN PAGE
 		  				<h2>Schedule for today{!mainPageTitle}!</h2>
 		  				<div class="scheduleImg">
                         	<apex:image url="/servlet/servlet.FileDownload?file={!scheduleImg.Id}" rendered="{!showScheduleFlag}"/>
@@ -46,7 +45,6 @@
 
 	  			<apex:outputPanel id="schedulePage">
 					<apex:form>
-		  				SCHEDULE PAGE
 		  				<div class="row">
 		  					<div class="col-xs-12 col-md-6" id="scheduleLeftBlock">
 			  					<apex:outputLabel value="Schedule Date "  for="scheduleDateShowOnPage"/>
@@ -78,7 +76,6 @@
 
 	  			<apex:outputPanel id="materialsPage">
 					<apex:form>
-		  				MATERIALS PAGE
 		  				<div>
 	                        <apex:selectList multiselect="false" size="1" value="{!selectedTheme}" id="selectMaterials">
 	                            <apex:actionSupport event="onchange" action="{!showMaterials}" reRender="materialsPage" status="initMaterialBlock"/>
