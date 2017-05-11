@@ -26,6 +26,6 @@ public class CallExternalService {
 //            }
 //            insert animalsForInsert;
         }
-		System.debug('::DEBUG:: only class');
+		System.debug('::DEBUG:: not only class');
     }
 }
