@@ -1,0 +1,38 @@
+<apex:page controller="StudyPageController">
+
+    <script type="text/javascript">
+        function checkAll(cb,cbid)
+        {
+            var inputElem = document.getElementsByTagName("input");
+            for(var i=0; i<inputElem.length; i++)
+            {
+                if(inputElem[i].id.indexOf(cbid)!=-1){
+                    inputElem[i].checked = cb.checked;
+                }
+            }
+        }
+    </script>
+
+    <apex:sectionHeader title="Any sObject" subTitle="Multiple Delete"/>
+    <apex:pageBlock id="theBlock">
+        <apex:pageBlockSection columns="2">
+            <apex:form>
+                <apex:selectList value="{!selectedSObj}" size="1" id="objects">
+                    <apex:selectOptions value="{!selectOptions}"/>
+                    <apex:actionSupport event="onchange" action="{!executeSelect}" reRender="theBlock"/>
+                </apex:selectList>
+                <apex:commandButton action="{!deleteSelectedRecords}" reRender="theBlock" value="Delete" style="width:10%"/>
+
+                <apex:pageBlockTable value="{!sObjectWrappers}" var="item" rendered="{!objectChoosed}">
+                    <apex:column ><apex:facet name="header">
+                        <apex:inputCheckbox onclick="checkAll(this,'checkedone')"/>
+                    </apex:facet>
+                        <apex:inputCheckbox value="{!item.deleteThis}" id="checkedone"/></apex:column>
+                    <apex:column headerValue="Name" rendered="{!hasName}">
+                        <apex:outputLabel value="{!item.name}"/>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:form>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>
